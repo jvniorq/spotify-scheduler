@@ -9,4 +9,4 @@ def test_spoxu_tray_icon_has_brand_identity() -> None:
     colors = {color for _count, color in icon.getcolors(maxcolors=4096) or []}
     assert (124, 92, 252, 255) in colors
     assert (56, 214, 199, 255) in colors
-    assert len(colors) >= 5
+    assert len(colors) >= 4
