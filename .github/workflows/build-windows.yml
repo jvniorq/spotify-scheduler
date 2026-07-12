@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Spoxu for Windows
 
 on:
   workflow_dispatch:
@@ -15,11 +15,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Build executable
+      - name: Build Spoxu executable
         shell: pwsh
         run: .\build_exe.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: SpotifySchedulerPro-Windows
-          path: dist/SpotifySchedulerPro
+          name: Spoxu-Windows
+          path: dist/Spoxu
           if-no-files-found: error
