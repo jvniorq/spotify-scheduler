@@ -8,7 +8,9 @@ from typing import Any
 import keyring
 from keyring.errors import KeyringError
 
-SERVICE_NAME = "SpotifySchedulerPro"
+from .branding import LEGACY_KEYRING_SERVICE
+
+SERVICE_NAME = LEGACY_KEYRING_SERVICE
 SECRET_KEY = "spotify_client_secret"
 
 

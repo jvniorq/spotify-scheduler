@@ -1,3 +1,4 @@
+
 $ErrorActionPreference = "Stop"
 Set-Location -LiteralPath $PSScriptRoot
 
@@ -13,7 +14,7 @@ pyinstaller `
   --noconfirm `
   --clean `
   --windowed `
-  --name "SpotifySchedulerPro" `
+  --name "Spoxu" `
   --collect-all keyring `
   --collect-all pystray `
   --collect-all spotipy `
@@ -21,4 +22,4 @@ pyinstaller `
   "src\spotify_scheduler_pro\__main__.py"
 
 Write-Host ""
-Write-Host "EXE generado en: dist\SpotifySchedulerPro\SpotifySchedulerPro.exe"
+Write-Host "EXE generado en: dist\Spoxu\Spoxu.exe"

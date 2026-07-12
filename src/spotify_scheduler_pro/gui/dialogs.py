@@ -4,8 +4,10 @@ import tkinter as tk
 from datetime import date
 from tkinter import messagebox, ttk
 
+from ..branding import DISPLAY_NAME
 from ..models import ScheduleEntry, ScheduleKind, SpotifyDevice, SpotifyPlaylist
 from ..scheduler import DAY_NAMES_ES, parse_date, parse_time
+from ..theme import PALETTE
 
 
 class ScheduleDialog(tk.Toplevel):
@@ -18,9 +20,14 @@ class ScheduleDialog(tk.Toplevel):
         devices: list[SpotifyDevice] | None = None,
     ):
         super().__init__(parent)
-        self.title("Editar horario" if entry else "Nuevo horario")
-        self.geometry("720x650")
-        self.minsize(650, 600)
+        self.title(
+            f"{DISPLAY_NAME} · Editar horario"
+            if entry
+            else f"{DISPLAY_NAME} · Nuevo horario"
+        )
+        self.geometry("740x680")
+        self.minsize(680, 620)
+        self.configure(background=PALETTE["background"])
         self.transient(parent)
         self.grab_set()
 
@@ -56,6 +63,8 @@ class ScheduleDialog(tk.Toplevel):
         self.kind_var.trace_add("write", lambda *_: self._update_kind_state())
         self._update_kind_state()
         self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.bind("<Escape>", lambda _event: self.destroy())
+        self.bind("<Control-Return>", lambda _event: self._save())
         self.wait_visibility()
         self.focus_force()
 
@@ -78,8 +87,8 @@ class ScheduleDialog(tk.Toplevel):
         return value.strip()
 
     def _build(self) -> None:
-        container = ttk.Frame(self, padding=18)
-        container.pack(fill="both", expand=True)
+        container = ttk.Frame(self, padding=18, style="Glass.TFrame")
+        container.pack(fill="both", expand=True, padx=18, pady=18)
         container.columnconfigure(1, weight=1)
 
         row = 0
@@ -93,7 +102,7 @@ class ScheduleDialog(tk.Toplevel):
         row += 1
 
         label("Tipo")
-        type_frame = ttk.Frame(container)
+        type_frame = ttk.Frame(container, style="Glass.TFrame")
         type_frame.grid(row=row, column=1, sticky="w", pady=6)
         ttk.Radiobutton(
             type_frame,
@@ -125,7 +134,7 @@ class ScheduleDialog(tk.Toplevel):
         ttk.Label(
             container,
             text="Formato AAAA-MM-DD",
-            foreground="#666666",
+            style="GlassMuted.TLabel",
         ).grid(row=row + 1, column=1, sticky="w")
         row += 2
 
@@ -138,7 +147,7 @@ class ScheduleDialog(tk.Toplevel):
         ttk.Label(
             container,
             text="Se permite cruzar medianoche: 22:00 → 02:00.",
-            foreground="#666666",
+            style="GlassMuted.TLabel",
         ).grid(row=row + 1, column=1, sticky="w")
         row += 2
 
@@ -155,7 +164,7 @@ class ScheduleDialog(tk.Toplevel):
         ttk.Label(
             container,
             text="Puedes elegir una playlist o pegar su URL/ID.",
-            foreground="#666666",
+            style="GlassMuted.TLabel",
         ).grid(row=row + 1, column=1, sticky="w")
         row += 2
 
@@ -169,7 +178,7 @@ class ScheduleDialog(tk.Toplevel):
         ttk.Label(
             container,
             text="Vacío = usar el dispositivo predeterminado de Ajustes.",
-            foreground="#666666",
+            style="GlassMuted.TLabel",
         ).grid(row=row + 1, column=1, sticky="w")
         row += 2
 
@@ -183,7 +192,12 @@ class ScheduleDialog(tk.Toplevel):
         ).grid(row=row, column=1, sticky="w", pady=6)
         row += 1
 
-        options = ttk.LabelFrame(container, text="Opciones", padding=12)
+        options = ttk.LabelFrame(
+            container,
+            text="Opciones",
+            padding=12,
+            style="Glass.TLabelframe",
+        )
         options.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(12, 8))
         ttk.Checkbutton(
             options,
@@ -202,10 +216,20 @@ class ScheduleDialog(tk.Toplevel):
         ).pack(anchor="w")
         row += 1
 
-        buttons = ttk.Frame(container)
+        buttons = ttk.Frame(container, style="Glass.TFrame")
         buttons.grid(row=row, column=0, columnspan=2, sticky="e", pady=(18, 0))
-        ttk.Button(buttons, text="Cancelar", command=self.destroy).pack(side="right")
-        ttk.Button(buttons, text="Guardar", command=self._save).pack(side="right", padx=(0, 10))
+        ttk.Button(
+            buttons,
+            text="Cancelar",
+            command=self.destroy,
+            style="Secondary.TButton",
+        ).pack(side="right")
+        ttk.Button(
+            buttons,
+            text="Guardar horario",
+            command=self._save,
+            style="Primary.TButton",
+        ).pack(side="right", padx=(0, 10))
 
     def _update_kind_state(self) -> None:
         weekly = self.kind_var.get() == ScheduleKind.WEEKLY.value

@@ -5,7 +5,9 @@ import platform
 import sys
 from pathlib import Path
 
-APP_NAME = "SpotifySchedulerPro"
+from .branding import LEGACY_AUTOSTART_NAME
+
+APP_NAME = LEGACY_AUTOSTART_NAME
 
 
 def _windows_startup_shortcut() -> Path:

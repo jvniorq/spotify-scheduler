@@ -1,35 +1,22 @@
-# Cambios de Spotify Scheduler Pro
 
-Esta edición conserva el propósito principal del repositorio original: programar
-la reproducción de playlists de Spotify. La implementación fue reorganizada y
-ampliada con:
+# Historial de cambios de Spoxu
 
-1. Arquitectura modular.
-2. Motor independiente de horarios.
-3. Reglas semanales recurrentes.
-4. Reglas por fecha específica.
-5. Horarios que cruzan medianoche.
-6. Prioridades y aviso de conflictos.
-7. Almacenamiento SQLite.
-8. Credenciales mediante keyring.
-9. Bandeja del sistema.
-10. Inicio automático con Windows.
-11. Prevención opcional de suspensión.
-12. Cola aleatoria con filtrado de canciones recientes y artistas consecutivos.
-13. Importación/exportación JSON.
-14. Historial local de eventos.
-15. Logs rotativos.
-16. Tests automatizados.
-17. Script para construir un EXE con PyInstaller.
+## 0.2.0 · Identidad Spoxu
 
-La licencia MIT y atribución del autor original se mantienen.
+- Nueva marca pública Spoxu y versión 0.2.0.
+- Interfaz oscura minimalista con estética glass, tarjetas, estados tipo chip y
+  paleta violeta/cian de alto contraste.
+- Navegación centrada en Inicio, Horarios, Conexión, Actividad, Playlists y Sistema.
+- Icono de bandeja propio, separado de la identidad visual de Spotify.
+- Ejecutable y artefacto Windows renombrados a `Spoxu`.
+- Constantes de marca y tema centralizadas y verificadas mediante pruebas.
+- Compatibilidad preservada con datos, keyring, exportaciones, namespace y autoinicio.
 
+## 0.1.0 · Reescritura modular
 
-## Correcciones previas a publicación
+- Motor de horarios semanales, por fecha, nocturnos, prioridades y conflictos.
+- SQLite, keyring, bandeja, autoinicio y prevención de suspensión.
+- Random Queue, importación/exportación, historial, logs, tests y compilación Windows.
+- OAuth atómico, llamadas Spotify serializadas y claves foráneas SQLite.
 
-- Exclusión real de canciones recientes en Random Queue.
-- Detección de conflictos con precisión de segundos.
-- Claves foráneas SQLite habilitadas en cada conexión.
-- Estado OAuth atómico, tokens en keyring y llamadas API serializadas.
-- Refrescos del dashboard sin solapamiento.
-- CI y compilación Windows mediante GitHub Actions.
+La licencia MIT y la atribución del autor original se mantienen.

@@ -5,6 +5,8 @@ from pathlib import Path
 
 from platformdirs import user_data_path
 
+from .branding import LEGACY_DATA_DIR_NAME
+
 
 @dataclass(frozen=True)
 class AppPaths:
@@ -17,7 +19,7 @@ class AppPaths:
 
     @classmethod
     def create(cls) -> AppPaths:
-        root = Path(user_data_path("SpotifySchedulerPro", appauthor=False, ensure_exists=True))
+        root = Path(user_data_path(LEGACY_DATA_DIR_NAME, appauthor=False, ensure_exists=True))
         logs_dir = root / "logs"
         logs_dir.mkdir(parents=True, exist_ok=True)
         return cls(

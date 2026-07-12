@@ -1,17 +1,18 @@
+
 [build-system]
 requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spotify-scheduler-pro"
-version = "0.1.0"
-description = "Desktop Spotify playback scheduler with recurring schedules, SQLite storage, tray support, and secure credentials."
+name = "spoxu"
+version = "0.2.0"
+description = "Spoxu automates Spotify playback with schedules, safe local storage, and a glass-inspired desktop interface."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
   {name = "Szymon Andrzejewski"},
-  {name = "Spotify Scheduler Pro contributors"}
+  {name = "Spoxu contributors"}
 ]
 dependencies = [
   "spotipy>=2.26.0",
@@ -31,6 +32,7 @@ dev = [
 ]
 
 [project.scripts]
+spoxu = "spotify_scheduler_pro.__main__:main"
 spotify-scheduler-pro = "spotify_scheduler_pro.__main__:main"
 
 [tool.setuptools]

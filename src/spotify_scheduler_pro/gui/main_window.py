@@ -11,6 +11,7 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 from typing import Any
 
 from ..autostart import set_start_with_windows
+from ..branding import DISPLAY_NAME, TAGLINE, VERSION, WINDOW_TITLE
 from ..config import AppConfig, ConfigManager
 from ..controller import AutomationController
 from ..models import ScheduleEntry, ScheduleKind, SpotifyDevice, SpotifyPlaylist
@@ -19,6 +20,7 @@ from ..scheduler import DAY_NAMES_ES, SchedulerEngine
 from ..spotify_client import SpotifyService
 from ..storage import Storage
 from ..system_control import set_prevent_sleep
+from ..theme import PALETTE, configure_theme
 from ..tray import TrayController
 from .dialogs import ScheduleDialog
 
@@ -95,37 +97,35 @@ class MainWindow:
             )
 
     def _configure_root(self) -> None:
-        self.root.title("Spotify Scheduler Pro")
-        self.root.geometry("1180x760")
-        self.root.minsize(980, 680)
+        self.root.title(WINDOW_TITLE)
+        self.root.geometry("1240x800")
+        self.root.minsize(1040, 700)
+        self.root.configure(background=PALETTE["background"])
+        self.root.option_add("*Font", "Segoe UI 10")
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_requested)
 
     def _build_style(self) -> None:
-        style = ttk.Style(self.root)
-        try:
-            if "vista" in style.theme_names():
-                style.theme_use("vista")
-        except tk.TclError:
-            pass
-
-        style.configure("Title.TLabel", font=("Segoe UI", 18, "bold"))
-        style.configure("Subtitle.TLabel", font=("Segoe UI", 11))
-        style.configure("StatusGood.TLabel", foreground="#0b7a32", font=("Segoe UI", 11, "bold"))
-        style.configure("StatusWarn.TLabel", foreground="#a35b00", font=("Segoe UI", 11, "bold"))
-        style.configure("Treeview", rowheight=28)
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
+        self.style = configure_theme(self.root)
 
     def _build_menu(self) -> None:
-        menu = tk.Menu(self.root)
+        menu_options = {
+            "background": PALETTE["surface"],
+            "foreground": PALETTE["text"],
+            "activebackground": PALETTE["accent"],
+            "activeforeground": "#FFFFFF",
+            "activeborderwidth": 0,
+            "borderwidth": 0,
+        }
+        menu = tk.Menu(self.root, **menu_options)
 
-        app_menu = tk.Menu(menu, tearoff=False)
+        app_menu = tk.Menu(menu, tearoff=False, **menu_options)
         app_menu.add_command(label="Mostrar carpeta de datos", command=self.open_data_folder)
         app_menu.add_command(label="Actualizar datos", command=self.refresh_everything)
         app_menu.add_separator()
         app_menu.add_command(label="Salir", command=self.exit)
-        menu.add_cascade(label="Aplicación", menu=app_menu)
+        menu.add_cascade(label=DISPLAY_NAME, menu=app_menu)
 
-        automation_menu = tk.Menu(menu, tearoff=False)
+        automation_menu = tk.Menu(menu, tearoff=False, **menu_options)
         automation_menu.add_command(
             label="Pausar/Reanudar automatización",
             command=self.toggle_automation,
@@ -137,40 +137,54 @@ class MainWindow:
         )
         menu.add_cascade(label="Automatización", menu=automation_menu)
 
-        help_menu = tk.Menu(menu, tearoff=False)
-        help_menu.add_command(label="Acerca de", command=self.show_about)
+        help_menu = tk.Menu(menu, tearoff=False, **menu_options)
+        help_menu.add_command(label="Acerca de Spoxu", command=self.show_about)
         menu.add_cascade(label="Ayuda", menu=help_menu)
-
         self.root.configure(menu=menu)
 
     def _build_layout(self) -> None:
-        header = ttk.Frame(self.root, padding=(16, 12))
+        header = ttk.Frame(self.root, style="Header.TFrame", padding=(24, 17))
         header.pack(fill="x")
 
-        ttk.Label(header, text="Spotify Scheduler Pro", style="Title.TLabel").pack(side="left")
+        brand = ttk.Frame(header, style="Header.TFrame")
+        brand.pack(side="left")
+        ttk.Label(brand, text=DISPLAY_NAME.upper(), style="Wordmark.TLabel").pack(anchor="w")
+        ttk.Label(brand, text=TAGLINE.upper(), style="Eyebrow.TLabel").pack(anchor="w")
 
-        self.connection_var = tk.StringVar(value="Spotify: desconectado")
-        ttk.Label(header, textvariable=self.connection_var).pack(side="right", padx=(12, 0))
+        status = ttk.Frame(header, style="Header.TFrame")
+        status.pack(side="right")
+        self.connection_var = tk.StringVar(value="Spotify · desconectado")
+        self.connection_label = ttk.Label(
+            status,
+            textvariable=self.connection_var,
+            style="ChipMuted.TLabel",
+        )
+        self.connection_label.pack(side="right", padx=(8, 0))
 
-        self.automation_var = tk.StringVar(value="Automatización: iniciando")
-        ttk.Label(header, textvariable=self.automation_var).pack(side="right")
+        self.automation_var = tk.StringVar(value="Automatización · iniciando")
+        self.automation_label = ttk.Label(
+            status,
+            textvariable=self.automation_var,
+            style="ChipWarn.TLabel",
+        )
+        self.automation_label.pack(side="right")
 
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+        self.notebook = ttk.Notebook(self.root, style="Spoxu.TNotebook")
+        self.notebook.pack(fill="both", expand=True, padx=20, pady=(14, 12))
 
-        self.dashboard_tab = ttk.Frame(self.notebook)
-        self.schedule_tab = ttk.Frame(self.notebook)
-        self.settings_tab = ttk.Frame(self.notebook)
-        self.history_tab = ttk.Frame(self.notebook)
-        self.transfer_tab = ttk.Frame(self.notebook)
-        self.logs_tab = ttk.Frame(self.notebook)
+        self.dashboard_tab = ttk.Frame(self.notebook, style="App.TFrame")
+        self.schedule_tab = ttk.Frame(self.notebook, style="App.TFrame")
+        self.settings_tab = ttk.Frame(self.notebook, style="App.TFrame")
+        self.history_tab = ttk.Frame(self.notebook, style="App.TFrame")
+        self.transfer_tab = ttk.Frame(self.notebook, style="App.TFrame")
+        self.logs_tab = ttk.Frame(self.notebook, style="App.TFrame")
 
-        self.notebook.add(self.dashboard_tab, text="Panel")
+        self.notebook.add(self.dashboard_tab, text="Inicio")
         self.notebook.add(self.schedule_tab, text="Horarios")
-        self.notebook.add(self.settings_tab, text="Ajustes")
-        self.notebook.add(self.history_tab, text="Historial")
-        self.notebook.add(self.transfer_tab, text="Importar/Exportar")
-        self.notebook.add(self.logs_tab, text="Registros")
+        self.notebook.add(self.settings_tab, text="Conexión")
+        self.notebook.add(self.history_tab, text="Actividad")
+        self.notebook.add(self.transfer_tab, text="Playlists")
+        self.notebook.add(self.logs_tab, text="Sistema")
 
         self._build_dashboard_tab()
         self._build_schedule_tab()
@@ -179,44 +193,54 @@ class MainWindow:
         self._build_transfer_tab()
         self._build_logs_tab()
 
-        footer = ttk.Frame(self.root, padding=(12, 4))
+        footer = ttk.Frame(self.root, style="Footer.TFrame", padding=(20, 8))
         footer.pack(fill="x")
         self.footer_var = tk.StringVar(value="Listo.")
-        ttk.Label(footer, textvariable=self.footer_var).pack(side="left")
+        ttk.Label(footer, textvariable=self.footer_var, style="Footer.TLabel").pack(side="left")
         ttk.Label(
             footer,
-            text=f"Datos: {self.paths.root}",
-            foreground="#666666",
+            text=f"DATOS LOCALES · {self.paths.root}",
+            style="Footer.TLabel",
         ).pack(side="right")
 
     def _build_dashboard_tab(self) -> None:
-        container = ttk.Frame(self.dashboard_tab, padding=18)
+        container = ttk.Frame(self.dashboard_tab, style="App.TFrame", padding=20)
         container.pack(fill="both", expand=True)
         container.columnconfigure(0, weight=1)
         container.columnconfigure(1, weight=1)
         container.rowconfigure(1, weight=1)
 
-        status_card = ttk.LabelFrame(container, text="Estado de automatización", padding=16)
-        status_card.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 12))
+        hero = ttk.Frame(container, style="Hero.TFrame", padding=20)
+        hero.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 14))
+        ttk.Label(
+            hero,
+            text="ESTADO EN TIEMPO REAL",
+            style="HeroEyebrow.TLabel",
+        ).pack(anchor="w")
 
         self.dashboard_status_var = tk.StringVar(value="Iniciando…")
         ttk.Label(
-            status_card,
+            hero,
             textvariable=self.dashboard_status_var,
-            style="StatusWarn.TLabel",
-            wraplength=1000,
-        ).pack(anchor="w")
+            style="HeroTitle.TLabel",
+            wraplength=1040,
+        ).pack(anchor="w", pady=(7, 0))
 
         self.next_schedule_var = tk.StringVar(value="")
         ttk.Label(
-            status_card,
+            hero,
             textvariable=self.next_schedule_var,
-            wraplength=1000,
-        ).pack(anchor="w", pady=(8, 0))
+            style="HeroMuted.TLabel",
+            wraplength=1040,
+        ).pack(anchor="w", pady=(7, 0))
 
-        playback_card = ttk.LabelFrame(container, text="Reproducción actual", padding=16)
-        playback_card.grid(row=1, column=0, sticky="nsew", padx=(0, 6))
-
+        playback_card = ttk.LabelFrame(
+            container,
+            text=" REPRODUCCIÓN ACTUAL ",
+            padding=18,
+            style="Glass.TLabelframe",
+        )
+        playback_card.grid(row=1, column=0, sticky="nsew", padx=(0, 7))
         self.now_playing_var = tk.StringVar(value="Sin datos.")
         ttk.Label(
             playback_card,
@@ -226,46 +250,71 @@ class MainWindow:
             font=("Segoe UI", 11),
         ).pack(anchor="nw", fill="both", expand=True)
 
-        device_card = ttk.LabelFrame(container, text="Dispositivos", padding=16)
-        device_card.grid(row=1, column=1, sticky="nsew", padx=(6, 0))
-
+        device_card = ttk.LabelFrame(
+            container,
+            text=" DISPOSITIVOS ",
+            padding=18,
+            style="Glass.TLabelframe",
+        )
+        device_card.grid(row=1, column=1, sticky="nsew", padx=(7, 0))
         self.device_listbox = tk.Listbox(
             device_card,
             height=12,
             activestyle="none",
             font=("Segoe UI", 10),
+            background=PALETTE["surface"],
+            foreground=PALETTE["text"],
+            selectbackground=PALETTE["selection"],
+            selectforeground="#FFFFFF",
+            highlightbackground=PALETTE["border"],
+            highlightcolor=PALETTE["accent"],
+            highlightthickness=1,
+            borderwidth=0,
+            relief="flat",
         )
         self.device_listbox.pack(fill="both", expand=True)
 
-        controls = ttk.Frame(container)
+        controls = ttk.Frame(container, style="App.TFrame")
         controls.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(14, 0))
-
         ttk.Button(
             controls,
             text="Actualizar Spotify",
             command=self.refresh_spotify_data,
+            style="Primary.TButton",
         ).pack(side="left")
         ttk.Button(
             controls,
             text="Pausar/Reanudar automatización",
             command=self.toggle_automation,
+            style="Secondary.TButton",
         ).pack(side="left", padx=8)
         ttk.Button(
             controls,
             text="Pausar música",
             command=self.manual_pause,
+            style="Secondary.TButton",
         ).pack(side="left")
         ttk.Button(
             controls,
             text="Ocultar en bandeja",
             command=self.hide_to_tray,
+            style="Secondary.TButton",
         ).pack(side="right")
 
     def _build_schedule_tab(self) -> None:
-        container = ttk.Frame(self.schedule_tab, padding=12)
+        container = ttk.Frame(self.schedule_tab, style="App.TFrame", padding=16)
         container.pack(fill="both", expand=True)
-        container.rowconfigure(0, weight=1)
+        container.rowconfigure(1, weight=1)
         container.columnconfigure(0, weight=1)
+
+        heading = ttk.Frame(container, style="App.TFrame")
+        heading.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 12))
+        ttk.Label(heading, text="Rutinas programadas", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(
+            heading,
+            text="Define qué debe sonar, cuándo y en qué dispositivo.",
+            style="Subtitle.TLabel",
+        ).pack(anchor="w", pady=(3, 0))
 
         columns = (
             "enabled",
@@ -285,7 +334,6 @@ class MainWindow:
             show="headings",
             selectmode="browse",
         )
-
         headings = {
             "enabled": "Activo",
             "name": "Nombre",
@@ -310,7 +358,6 @@ class MainWindow:
             "random": 75,
             "priority": 70,
         }
-
         for column in columns:
             self.schedule_tree.heading(column, text=headings[column])
             self.schedule_tree.column(column, width=widths[column], anchor="center")
@@ -321,37 +368,65 @@ class MainWindow:
             command=self.schedule_tree.yview,
         )
         self.schedule_tree.configure(yscrollcommand=scrollbar.set)
-        self.schedule_tree.grid(row=0, column=0, sticky="nsew")
-        scrollbar.grid(row=0, column=1, sticky="ns")
-
+        self.schedule_tree.grid(row=1, column=0, sticky="nsew")
+        scrollbar.grid(row=1, column=1, sticky="ns")
         self.schedule_tree.bind("<Double-1>", lambda _event: self.edit_schedule())
 
-        buttons = ttk.Frame(container)
-        buttons.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(10, 0))
-
-        ttk.Button(buttons, text="Nuevo", command=self.add_schedule).pack(side="left")
-        ttk.Button(buttons, text="Editar", command=self.edit_schedule).pack(side="left", padx=6)
-        ttk.Button(buttons, text="Eliminar", command=self.delete_schedule).pack(side="left")
-        ttk.Button(buttons, text="Habilitar/Deshabilitar", command=self.toggle_schedule).pack(
-            side="left", padx=6
-        )
-        ttk.Button(buttons, text="Probar ahora", command=self.test_schedule_now).pack(
-            side="left", padx=(6, 0)
-        )
-        ttk.Button(buttons, text="Actualizar", command=self.refresh_schedules).pack(side="right")
+        buttons = ttk.Frame(container, style="App.TFrame")
+        buttons.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+        ttk.Button(
+            buttons,
+            text="Nuevo horario",
+            command=self.add_schedule,
+            style="Primary.TButton",
+        ).pack(side="left")
+        ttk.Button(
+            buttons,
+            text="Editar",
+            command=self.edit_schedule,
+            style="Secondary.TButton",
+        ).pack(side="left", padx=6)
+        ttk.Button(
+            buttons,
+            text="Eliminar",
+            command=self.delete_schedule,
+            style="Danger.TButton",
+        ).pack(side="left")
+        ttk.Button(
+            buttons,
+            text="Habilitar/Deshabilitar",
+            command=self.toggle_schedule,
+            style="Secondary.TButton",
+        ).pack(side="left", padx=6)
+        ttk.Button(
+            buttons,
+            text="Probar ahora",
+            command=self.test_schedule_now,
+            style="Secondary.TButton",
+        ).pack(side="left", padx=(0, 6))
+        ttk.Button(
+            buttons,
+            text="Actualizar",
+            command=self.refresh_schedules,
+            style="Secondary.TButton",
+        ).pack(side="right")
 
         self.schedule_info_var = tk.StringVar(value="")
         ttk.Label(
             container,
             textvariable=self.schedule_info_var,
-            foreground="#555555",
+            style="Muted.TLabel",
             wraplength=1000,
-        ).grid(row=2, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        ).grid(row=3, column=0, columnspan=2, sticky="w", pady=(8, 0))
 
     def _build_settings_tab(self) -> None:
-        canvas = tk.Canvas(self.settings_tab, highlightthickness=0)
+        canvas = tk.Canvas(
+            self.settings_tab,
+            highlightthickness=0,
+            background=PALETTE["background"],
+        )
         scrollbar = ttk.Scrollbar(self.settings_tab, orient="vertical", command=canvas.yview)
-        frame = ttk.Frame(canvas, padding=20)
+        frame = ttk.Frame(canvas, padding=20, style="App.TFrame")
 
         frame.bind(
             "<Configure>",
@@ -366,7 +441,7 @@ class MainWindow:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        credentials = ttk.LabelFrame(frame, text="Spotify Developer", padding=16)
+        credentials = ttk.LabelFrame(frame, style="Glass.TLabelframe", text="Spotify Developer", padding=16)
         credentials.pack(fill="x", pady=(0, 12))
         credentials.columnconfigure(1, weight=1)
 
@@ -391,10 +466,10 @@ class MainWindow:
         ttk.Label(
             credentials,
             text="Registra exactamente esta URI en Spotify Developer Dashboard.",
-            foreground="#666666",
+            style="GlassMuted.TLabel",
         ).grid(row=3, column=1, sticky="w")
 
-        playback = ttk.LabelFrame(frame, text="Reproducción y automatización", padding=16)
+        playback = ttk.LabelFrame(frame, style="Glass.TLabelframe", text="Reproducción y automatización", padding=16)
         playback.pack(fill="x", pady=(0, 12))
         playback.columnconfigure(1, weight=1)
 
@@ -443,7 +518,7 @@ class MainWindow:
             to=50,
         ).grid(row=3, column=1, sticky="w", padx=(12, 0), pady=6)
 
-        behavior = ttk.LabelFrame(frame, text="Comportamiento", padding=16)
+        behavior = ttk.LabelFrame(frame, style="Glass.TLabelframe", text="Comportamiento", padding=16)
         behavior.pack(fill="x", pady=(0, 12))
 
         self.pause_outside_var = tk.BooleanVar()
@@ -498,12 +573,12 @@ class MainWindow:
         ).pack(fill="x", pady=(12, 0))
 
     def _build_history_tab(self) -> None:
-        notebook = ttk.Notebook(self.history_tab)
+        notebook = ttk.Notebook(self.history_tab, style="Spoxu.TNotebook")
         notebook.pack(fill="both", expand=True, padx=12, pady=12)
 
-        recent_frame = ttk.Frame(notebook)
-        local_frame = ttk.Frame(notebook)
-        notebook.add(recent_frame, text="Spotify: canciones recientes")
+        recent_frame = ttk.Frame(notebook, style="App.TFrame", padding=10)
+        local_frame = ttk.Frame(notebook, style="App.TFrame", padding=10)
+        notebook.add(recent_frame, text="Spotify · canciones recientes")
         notebook.add(local_frame, text="Eventos de automatización")
 
         recent_columns = ("played_at", "title", "artist", "explicit")
@@ -525,16 +600,10 @@ class MainWindow:
             recent_frame,
             text="Actualizar",
             command=self.refresh_recent_tracks,
+            style="Secondary.TButton",
         ).pack(anchor="e", pady=(8, 0))
 
-        event_columns = (
-            "timestamp",
-            "type",
-            "schedule",
-            "playlist",
-            "device",
-            "details",
-        )
+        event_columns = ("timestamp", "type", "schedule", "playlist", "device", "details")
         self.events_tree = ttk.Treeview(
             local_frame,
             columns=event_columns,
@@ -555,87 +624,105 @@ class MainWindow:
             local_frame,
             text="Actualizar",
             command=self.refresh_local_events,
+            style="Secondary.TButton",
         ).pack(anchor="e", pady=(8, 0))
 
     def _build_transfer_tab(self) -> None:
-        container = ttk.Frame(self.transfer_tab, padding=24)
+        container = ttk.Frame(self.transfer_tab, style="App.TFrame", padding=24)
         container.pack(fill="both", expand=True)
 
+        card = ttk.Frame(container, style="Glass.TFrame", padding=24)
+        card.pack(fill="x")
+        ttk.Label(card, text="Biblioteca portátil", style="Title.TLabel").pack(anchor="w")
         ttk.Label(
-            container,
-            text="Copias de seguridad de playlists",
-            style="Title.TLabel",
-        ).pack(anchor="w")
-
-        ttk.Label(
-            container,
+            card,
             text=(
                 "Exporta una playlist a JSON con sus canciones y, cuando sea posible, "
-                "su portada. También puedes importar un archivo generado por esta edición."
+                "su portada. También puedes importar archivos compatibles."
             ),
+            style="GlassMuted.TLabel",
             wraplength=900,
         ).pack(anchor="w", pady=(8, 22))
 
         self.transfer_playlist_var = tk.StringVar()
         self.transfer_playlist_combo = ttk.Combobox(
-            container,
+            card,
             textvariable=self.transfer_playlist_var,
             width=90,
         )
         self.transfer_playlist_combo.pack(fill="x")
 
-        buttons = ttk.Frame(container)
+        buttons = ttk.Frame(card, style="Glass.TFrame")
         buttons.pack(fill="x", pady=16)
-
         ttk.Button(
             buttons,
-            text="Exportar playlist seleccionada",
+            text="Exportar playlist",
             command=self.export_playlist,
+            style="Primary.TButton",
         ).pack(side="left")
         ttk.Button(
             buttons,
-            text="Importar playlist desde JSON",
+            text="Importar desde JSON",
             command=self.import_playlist,
+            style="Secondary.TButton",
         ).pack(side="left", padx=8)
         ttk.Button(
             buttons,
             text="Actualizar lista",
             command=self.refresh_spotify_data,
+            style="Secondary.TButton",
         ).pack(side="left")
 
         self.transfer_status_var = tk.StringVar(value="")
         ttk.Label(
-            container,
+            card,
             textvariable=self.transfer_status_var,
+            style="GlassMuted.TLabel",
             wraplength=900,
         ).pack(anchor="w", pady=(8, 0))
 
     def _build_logs_tab(self) -> None:
-        container = ttk.Frame(self.logs_tab, padding=12)
+        container = ttk.Frame(self.logs_tab, style="App.TFrame", padding=12)
         container.pack(fill="both", expand=True)
-
         self.log_text = tk.Text(
             container,
             wrap="none",
             font=("Consolas", 9),
             state="disabled",
+            background=PALETTE["console"],
+            foreground=PALETTE["text"],
+            insertbackground=PALETTE["text"],
+            selectbackground=PALETTE["selection"],
+            selectforeground="#FFFFFF",
+            highlightbackground=PALETTE["border"],
+            highlightcolor=PALETTE["accent"],
+            highlightthickness=1,
+            borderwidth=0,
+            relief="flat",
         )
         y_scroll = ttk.Scrollbar(container, orient="vertical", command=self.log_text.yview)
         x_scroll = ttk.Scrollbar(container, orient="horizontal", command=self.log_text.xview)
         self.log_text.configure(yscrollcommand=y_scroll.set, xscrollcommand=x_scroll.set)
-
         self.log_text.grid(row=0, column=0, sticky="nsew")
         y_scroll.grid(row=0, column=1, sticky="ns")
         x_scroll.grid(row=1, column=0, sticky="ew")
         container.rowconfigure(0, weight=1)
         container.columnconfigure(0, weight=1)
 
-        controls = ttk.Frame(container)
-        controls.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(8, 0))
-        ttk.Button(controls, text="Actualizar", command=self.refresh_log).pack(side="left")
-        ttk.Button(controls, text="Abrir carpeta de logs", command=self.open_logs_folder).pack(
-            side="left", padx=8
-        )
+        controls = ttk.Frame(container, style="App.TFrame")
+        controls.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        ttk.Button(
+            controls,
+            text="Actualizar",
+            command=self.refresh_log,
+            style="Primary.TButton",
+        ).pack(side="left")
+        ttk.Button(
+            controls,
+            text="Abrir carpeta de logs",
+            command=self.open_logs_folder,
+            style="Secondary.TButton",
+        ).pack(side="left", padx=8)
 
     def _load_config_into_form(self) -> None:
         self.client_id_var.set(self.config.client_id)
@@ -1149,14 +1236,19 @@ class MainWindow:
         _payload: dict[str, Any] | None,
     ) -> None:
         self.dashboard_status_var.set(message)
+        paused = self.controller.paused
         self.automation_var.set(
-            "Automatización: pausada"
-            if self.controller.paused
-            else "Automatización: activa"
+            "Automatización · pausada" if paused else "Automatización · activa"
+        )
+        self.automation_label.configure(
+            style="ChipWarn.TLabel" if paused else "ChipGood.TLabel"
         )
 
     def _set_connection_status(self, text: str) -> None:
-        self.connection_var.set(text)
+        self.connection_var.set(text.replace("Spotify:", "Spotify ·"))
+        self.connection_label.configure(
+            style="ChipGood.TLabel" if self.spotify.connected else "ChipMuted.TLabel"
+        )
 
     def _set_transfer_status(self, text: str) -> None:
         self.transfer_status_var.set(text)
@@ -1236,10 +1328,18 @@ class MainWindow:
 
     def show_about(self) -> None:
         messagebox.showinfo(
-            "Acerca de",
-            "Spotify Scheduler Pro 0.1.0\n\n"
-            "Edición modular inspirada en spotify-scheduler de Szymon Andrzejewski.\n"
-            "Licencia MIT.\n\n"
+            f"Acerca de {DISPLAY_NAME}",
+            f"{DISPLAY_NAME} {VERSION}
+{TAGLINE}
+
+"
+            "Diseño glass oscuro y motor modular de automatización.
+"
+            "Inspirado en spotify-scheduler de Szymon Andrzejewski.
+"
+            "Licencia MIT. Proyecto independiente, no afiliado con Spotify.
+
+"
             "Requiere Spotify Premium y un dispositivo Spotify Connect.",
         )
 

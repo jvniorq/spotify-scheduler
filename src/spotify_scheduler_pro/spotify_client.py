@@ -17,6 +17,11 @@ from PIL import Image
 from spotipy.cache_handler import CacheHandler
 from spotipy.oauth2 import SpotifyOAuth
 
+from .branding import (
+    DISPLAY_NAME,
+    LEGACY_OAUTH_SERVICE,
+    PLAYLIST_EXPORT_FORMAT,
+)
 from .config import AppConfig, ConfigManager
 from .models import SpotifyDevice, SpotifyPlaylist
 from .paths import AppPaths
@@ -49,7 +54,7 @@ class SpotifyPremiumRequiredError(RuntimeError):
 
 
 class KeyringTokenCache(CacheHandler):
-    SERVICE_NAME = "SpotifySchedulerProOAuth"
+    SERVICE_NAME = LEGACY_OAUTH_SERVICE
 
     def __init__(self, client_id: str):
         self.username = f"token:{client_id}"
@@ -380,7 +385,7 @@ class SpotifyService:
             name=name,
             public=False,
             collaborative=False,
-            description="Generada automáticamente por Spotify Scheduler Pro.",
+            description=f"Generada automáticamente por {DISPLAY_NAME}.",
         )
         temporary_id = str(created["id"])
 
@@ -442,7 +447,7 @@ class SpotifyService:
                 LOGGER.exception("No se pudo incluir la portada al exportar.")
 
         payload = {
-            "format": "spotify-scheduler-pro-playlist-v1",
+            "format": PLAYLIST_EXPORT_FORMAT,
             "metadata": {
                 "name": playlist.name,
                 "owner": playlist.owner,
@@ -471,8 +476,8 @@ class SpotifyService:
 
     def import_playlist(self, source: Path, *, new_name: str | None = None) -> SpotifyPlaylist:
         payload = json.loads(source.read_text(encoding="utf-8"))
-        if payload.get("format") != "spotify-scheduler-pro-playlist-v1":
-            raise ValueError("El archivo no pertenece al formato Spotify Scheduler Pro.")
+        if payload.get("format") != PLAYLIST_EXPORT_FORMAT:
+            raise ValueError(f"El archivo no pertenece al formato compatible de {DISPLAY_NAME}.")
 
         metadata = payload.get("metadata") or {}
         tracks = payload.get("tracks") or []
@@ -490,7 +495,7 @@ class SpotifyService:
             user=str(profile["id"]),
             name=playlist_name,
             public=False,
-            description=f"Importada por Spotify Scheduler Pro el {datetime.now():%Y-%m-%d}.",
+            description=f"Importada por {DISPLAY_NAME} el {datetime.now():%Y-%m-%d}.",
         )
         playlist_id = str(created["id"])
 

@@ -1,120 +1,127 @@
-# Spotify Scheduler Pro
 
-Edición modular y ampliada, inspirada en el proyecto original
-[`sandrzejewskipl/spotify-scheduler`](https://github.com/sandrzejewskipl/spotify-scheduler).
+# Spoxu
 
-## Uso permitido y limitaciones
+**Automatización musical para espacios que no pueden detenerse.**
 
-Esta aplicación es exclusivamente para uso personal y no comercial. Spotify no
-permite reproducir su servicio públicamente en restaurantes, colegios, bares,
-tiendas u otros negocios, incluso con una cuenta Premium. Consulta la política
-de uso público/comercial de Spotify y su Developer Policy.
+Spoxu es una aplicación de escritorio para programar y controlar la reproducción
+de Spotify en restaurantes, centros educativos, oficinas y otros espacios. Su
+interfaz oscura, minimalista y de inspiración glass concentra horarios,
+dispositivos, actividad y playlists sin obligarte a cambiar música manualmente.
 
-Este proyecto no está afiliado, patrocinado ni aprobado por Spotify.
+> Spoxu es un proyecto independiente y no está afiliado, patrocinado ni respaldado por Spotify.
 
-## Qué incorpora
+## Qué incluye
 
-- Programación semanal recurrente y por fecha específica.
-- Intervalos que atraviesan medianoche, por ejemplo `22:00 → 02:00`.
-- Detección básica de conflictos de horarios.
-- Persistencia en SQLite.
-- OAuth con Spotify Web API mediante Spotipy.
-- Credenciales sensibles almacenadas con `keyring`.
-- Selección de dispositivo Spotify Connect.
-- Cola aleatoria que intenta evitar artistas consecutivos y canciones recientes.
-- Inicio, pausa y prueba inmediata de una playlist.
-- Importación y exportación de playlists como JSON.
-- Inicio automático con Windows.
-- Minimización a la bandeja del sistema.
-- Registro rotativo de eventos y errores.
-- Pruebas unitarias del motor de horarios.
+- Horarios semanales y por fecha específica.
+- Ventanas nocturnas como `22:00–02:00`.
+- Prioridades y detección precisa de conflictos.
+- Pausa automática fuera del horario.
+- Selección de dispositivos Spotify Connect y prueba inmediata de playlists.
+- Random Queue con menos repeticiones, separación de artistas y exclusión de
+  canciones recientes.
+- Filtro opcional de canciones explícitas.
+- Importación y exportación de playlists.
+- Historial local, logs rotativos y almacenamiento SQLite.
+- Credenciales y tokens en el almacén seguro del sistema.
+- Bandeja, autoinicio de Windows y prevención opcional de suspensión.
+- Pruebas automatizadas y construcción reproducible del EXE en GitHub Actions.
+
+## Diseño Spoxu
+
+La interfaz usa una estética glass oscura basada en superficies profundas,
+bordes sutiles, acentos violeta/cian y estados de alto contraste. Tkinter no
+ofrece blur nativo por widget; Spoxu evita transparencias que reduzcan la
+legibilidad y reproduce el lenguaje glass mediante jerarquía, color y espacio.
 
 ## Requisitos
 
-- Windows 10/11, Linux o macOS.
-- Python 3.11 o 3.12.
-- Spotify Premium.
-- Spotify Desktop o un dispositivo Spotify Connect activo.
+- Windows 10 u 11 recomendado.
+- Python 3.11 o superior para ejecutar desde código.
+- Una cuenta Spotify Premium.
 - Una aplicación creada en Spotify Developer Dashboard.
-- Redirect URI configurado exactamente como:
+- Al menos un dispositivo Spotify Connect disponible.
+
+## Configuración de Spotify
+
+1. Crea una aplicación en Spotify Developer Dashboard.
+2. Registra exactamente esta Redirect URI:
 
 ```text
 http://127.0.0.1:23918
 ```
 
-## Instalación en Windows
+3. Abre Spoxu y entra en **Conexión**.
+4. Pega el Client ID, el Client Secret y la Redirect URI.
+5. Pulsa **Guardar y autorizar**.
+6. Completa el inicio de sesión en el navegador.
+
+El Client Secret y los tokens OAuth no se guardan en `config.json`; se almacenan
+mediante `keyring`.
+
+## Ejecutar desde código
 
 ```powershell
-cd C:\Dev
-git clone <TU_REPOSITORIO_O_COPIA>
-cd spotify-scheduler-pro
+git clone <URL_DE_TU_FORK>
+cd spotify-scheduler
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e .
+spoxu
+```
+
+El alias técnico anterior sigue disponible para compatibilidad:
+
+```powershell
 python -m spotify_scheduler_pro
 ```
 
-También puedes ejecutar:
-
-```powershell
-.\run_windows.ps1
-```
-
-## Primer uso
-
-1. Crea una app en Spotify Developer Dashboard.
-2. Activa **Web API**.
-3. Registra `http://127.0.0.1:23918` como Redirect URI.
-4. Abre la pestaña **Ajustes**.
-5. Ingresa `Client ID` y `Client Secret`.
-6. Pulsa **Guardar y autorizar**.
-7. Autoriza la aplicación en el navegador.
-8. Actualiza la lista de dispositivos.
-9. Crea un horario en la pestaña **Horarios**.
-
-## Compilar a EXE
+## Construir el EXE
 
 ```powershell
 .\build_exe.ps1
 ```
 
-El ejecutable se generará dentro de:
+El resultado es `dist\Spoxu\Spoxu.exe`. También puedes ejecutar manualmente el
+workflow **Build Windows EXE** y descargar el artefacto `Spoxu-Windows`.
 
-```text
-dist\SpotifySchedulerPro\SpotifySchedulerPro.exe
-```
+## Datos locales y compatibilidad
 
-## Datos locales
-
-La aplicación usa la carpeta estándar de datos de usuario:
+Para que una actualización no pierda horarios, configuración ni credenciales,
+la versión 0.2 mantiene los identificadores internos heredados. La carpeta de
+datos continúa siendo:
 
 - Windows: `%LOCALAPPDATA%\SpotifySchedulerPro`
 - Linux: `~/.local/share/SpotifySchedulerPro`
 - macOS: `~/Library/Application Support/SpotifySchedulerPro`
 
-Allí se almacenan:
+Allí se almacenan `scheduler.db`, `config.json` y `logs/app.log`.
 
-- `scheduler.db`
-- `config.json`
-- `logs/app.log`
+## Verificación
 
-El `Client Secret` no se almacena dentro de `config.json`; se guarda mediante el
-almacén seguro de credenciales del sistema cuando `keyring` está disponible.
+```powershell
+python -m pip install -e ".[dev]"
+python -m ruff check .
+python -m pytest -q
+```
 
-## Nota importante
+CI ejecuta estos controles en cada push y pull request.
 
-Esta edición se entrega como base completa de desarrollo. El código fue
-verificado mediante compilación estática y pruebas locales del motor de
-horarios, pero la autenticación y reproducción reales requieren tus
-credenciales, Spotify Premium, conexión a Internet y un dispositivo disponible.
+## Uso responsable
 
+Spotify no permite el uso público o comercial de su servicio. Cada usuario debe
+cumplir los términos, las políticas de desarrolladores, las licencias y las
+normas aplicables de Spotify. Este software se distribuye para uso personal y no
+comercial.
 
-## Automatización en GitHub
+## Privacidad
 
-Los workflows incluidos ejecutan Ruff y pytest en GitHub Actions y permiten
-construir el ejecutable Windows manualmente desde la pestaña Actions, sin
-instalar dependencias en el equipo usado para administrar el repositorio.
+Spoxu no mantiene un servidor propio ni envía telemetría. Consulta
+[`PRIVACY.md`](PRIVACY.md) para conocer qué datos se guardan localmente.
 
-Los tokens OAuth y el Client Secret se guardan con keyring. Al cerrar sesión se
-elimina también cualquier caché OAuth heredada.
+## Origen y licencia
+
+Spoxu deriva del trabajo del proyecto original
+[`sandrzejewskipl/spotify-scheduler`](https://github.com/sandrzejewskipl/spotify-scheduler).
+Se mantienen la licencia MIT, la atribución a Szymon Andrzejewski y el código de
+conducta del repositorio original.

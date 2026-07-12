@@ -15,7 +15,7 @@ def _ensure_src_importable() -> None:
 def main() -> None:
     _ensure_src_importable()
 
-    parser = argparse.ArgumentParser(description="Spotify Scheduler Pro")
+    parser = argparse.ArgumentParser(description="Spoxu · Automatización musical")
     parser.add_argument(
         "--minimized",
         action="store_true",

@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import logging
@@ -6,16 +7,25 @@ from collections.abc import Callable
 
 from PIL import Image, ImageDraw
 
+from .branding import DISPLAY_NAME
+
 LOGGER = logging.getLogger("spotify_scheduler_pro.tray")
 
 
 def _make_icon() -> Image.Image:
-    image = Image.new("RGBA", (64, 64), (24, 24, 24, 255))
+    image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
-    draw.ellipse((5, 5, 59, 59), fill=(30, 215, 96, 255))
-    draw.arc((18, 20, 48, 42), start=210, end=330, fill=(15, 15, 15, 255), width=4)
-    draw.arc((20, 27, 46, 47), start=210, end=330, fill=(15, 15, 15, 255), width=4)
-    draw.arc((22, 34, 44, 52), start=210, end=330, fill=(15, 15, 15, 255), width=4)
+    draw.rounded_rectangle(
+        (5, 5, 59, 59),
+        radius=17,
+        fill=(18, 26, 43, 255),
+        outline=(124, 92, 252, 255),
+        width=3,
+    )
+    draw.arc((16, 14, 48, 36), start=190, end=350, fill=(56, 214, 199, 255), width=5)
+    draw.arc((16, 28, 48, 50), start=10, end=170, fill=(124, 92, 252, 255), width=5)
+    draw.ellipse((42, 17, 48, 23), fill=(56, 214, 199, 255))
+    draw.ellipse((16, 41, 22, 47), fill=(124, 92, 252, 255))
     return image
 
 
@@ -35,7 +45,6 @@ class TrayController:
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             return
-
         try:
             import pystray
         except ImportError:
@@ -49,20 +58,20 @@ class TrayController:
             paused = self.pause_callback()
             if self._icon:
                 self._icon.title = (
-                    "Spotify Scheduler Pro · Pausado"
+                    f"{DISPLAY_NAME} · Pausado"
                     if paused
-                    else "Spotify Scheduler Pro · Activo"
+                    else f"{DISPLAY_NAME} · Activo"
                 )
 
         def quit_app(_icon=None, _item=None):
             self.exit_callback()
 
         self._icon = pystray.Icon(
-            "SpotifySchedulerPro",
+            DISPLAY_NAME,
             _make_icon(),
-            "Spotify Scheduler Pro",
+            DISPLAY_NAME,
             menu=pystray.Menu(
-                pystray.MenuItem("Mostrar", show, default=True),
+                pystray.MenuItem(f"Abrir {DISPLAY_NAME}", show, default=True),
                 pystray.MenuItem("Pausar/Reanudar automatización", pause),
                 pystray.Menu.SEPARATOR,
                 pystray.MenuItem("Salir", quit_app),
