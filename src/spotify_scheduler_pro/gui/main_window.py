@@ -1329,17 +1329,10 @@ class MainWindow:
     def show_about(self) -> None:
         messagebox.showinfo(
             f"Acerca de {DISPLAY_NAME}",
-            f"{DISPLAY_NAME} {VERSION}
-{TAGLINE}
-
-"
-            "Diseño glass oscuro y motor modular de automatización.
-"
-            "Inspirado en spotify-scheduler de Szymon Andrzejewski.
-"
-            "Licencia MIT. Proyecto independiente, no afiliado con Spotify.
-
-"
+            f"{DISPLAY_NAME} {VERSION}\n{TAGLINE}\n\n"
+            "Diseño glass oscuro y motor modular de automatización.\n"
+            "Inspirado en spotify-scheduler de Szymon Andrzejewski.\n"
+            "Licencia MIT. Proyecto independiente, no afiliado con Spotify.\n\n"
             "Requiere Spotify Premium y un dispositivo Spotify Connect.",
         )
 
