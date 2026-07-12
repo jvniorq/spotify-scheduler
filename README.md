@@ -1,125 +1,120 @@
-<p align="center">
-<img src="icon.ico" width='150'>
-</p>
+# Spotify Scheduler Pro
 
-<h1 align="center"><a href="https://github.com/sandrzejewskipl/spotify-scheduler">Spotify Scheduler</a> <br>Automate and schedule your Spotify playback</h1>
+Edición modular y ampliada, inspirada en el proyecto original
+[`sandrzejewskipl/spotify-scheduler`](https://github.com/sandrzejewskipl/spotify-scheduler).
 
-This Python GUI application lets you schedule Spotify playlists to play at a specific time (hours, minutes, seconds) on a specific day. Easily automate your Spotify playback to match your schedule and listening preferences with precision. You can select a different playlist for each time slot. It's a much easier alternative to music automation software. Spotify Scheduler also features a history of recently played songs.
+## Uso permitido y limitaciones
 
-![Screenshot of Now Playing tab that display the currently played song on Spotify, current time slot and checklist feature](img/now_playing.png)
+Esta aplicación es exclusivamente para uso personal y no comercial. Spotify no
+permite reproducir su servicio públicamente en restaurantes, colegios, bares,
+tiendas u otros negocios, incluso con una cuenta Premium. Consulta la política
+de uso público/comercial de Spotify y su Developer Policy.
 
-Easily plan and schedule music for any time of the day! Modify your schedule, choose a playlist from the user's playlist library, or directly add a playlist using its ID or link. Perfect for managing music playback effortlessly, whether you're creating a radio station for your school to play music during breaks or events, setting up a music schedule for your workplace, or planning playlists for specific times at venues.
+Este proyecto no está afiliado, patrocinado ni aprobado por Spotify.
 
-### Schedule
-On the Schedule tab, pick any day on the calendar and create a custom schedule by adding timeslots and selecting a playlist. Next, you can copy your schedule to X days or to weekdays ahead.
+## Qué incorpora
 
-You can also turn on <b>Random queue</b> for specific playlist. It's an alternative to Spotify's shuffle (which is not really random). When starting playback, the app will create a temporary playlist with random tracks from your playlist. <b>Random queue doesn't support local tracks!</b> 
-<h3>If you're using <b>Random queue</b>, disable shuffle option in your Spotify client.</h3>
+- Programación semanal recurrente y por fecha específica.
+- Intervalos que atraviesan medianoche, por ejemplo `22:00 → 02:00`.
+- Detección básica de conflictos de horarios.
+- Persistencia en SQLite.
+- OAuth con Spotify Web API mediante Spotipy.
+- Credenciales sensibles almacenadas con `keyring`.
+- Selección de dispositivo Spotify Connect.
+- Cola aleatoria que intenta evitar artistas consecutivos y canciones recientes.
+- Inicio, pausa y prueba inmediata de una playlist.
+- Importación y exportación de playlists como JSON.
+- Inicio automático con Windows.
+- Minimización a la bandeja del sistema.
+- Registro rotativo de eventos y errores.
+- Pruebas unitarias del motor de horarios.
 
-![Screenshot of Schedule tab that contains your calendar, timeslots, playlists and random queue.](img/schedule.png)
+## Requisitos
 
-### Recently played
-In the Recently played tab, you can see your playback history.
+- Windows 10/11, Linux o macOS.
+- Python 3.11 o 3.12.
+- Spotify Premium.
+- Spotify Desktop o un dispositivo Spotify Connect activo.
+- Una aplicación creada en Spotify Developer Dashboard.
+- Redirect URI configurado exactamente como:
 
-![Screenshot of Recently played tab that contains your playback history with time, title and authors](img/recently_played.png)
+```text
+http://127.0.0.1:23918
+```
 
-### Import/Export Playlists
-In the Import/Export tab, you can export your playlists as a JSON file, then import them using that JSON file. Ideal for backup or sharing. Cover art is also exported.
+## Instalación en Windows
 
-> [!IMPORTANT]
-> Make sure you have a Spotify Premium subscription and are using Spotify's desktop app - not web version!
+```powershell
+cd C:\Dev
+git clone <TU_REPOSITORIO_O_COPIA>
+cd spotify-scheduler-pro
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .
+python -m spotify_scheduler_pro
+```
 
-## Running on Windows
-<b>Set up Spotify App:</b>
+También puedes ejecutar:
 
-- Go to [Spotify for Developers Dashboard](https://developer.spotify.com/dashboard) and create a new app.<br>
-- Set the Redirect URI to: `http://127.0.0.1:23918`.<br>
-- Select Web API<br>
+```powershell
+.\run_windows.ps1
+```
 
-Download an `.exe` file from the latest release <a href="https://github.com/sandrzejewskipl/spotify-scheduler/releases">here</a> and launch it.
+## Primer uso
 
-On the first run, you will be asked for CLIENT_ID and CLIENT_SECRET from Spotify. Then the OAuth popup should open
+1. Crea una app en Spotify Developer Dashboard.
+2. Activa **Web API**.
+3. Registra `http://127.0.0.1:23918` como Redirect URI.
+4. Abre la pestaña **Ajustes**.
+5. Ingresa `Client ID` y `Client Secret`.
+6. Pulsa **Guardar y autorizar**.
+7. Autoriza la aplicación en el navegador.
+8. Actualiza la lista de dispositivos.
+9. Crea un horario en la pestaña **Horarios**.
 
-## Running on Linux
-<b>Clone the repository (by the command below, or download it)</b>
+## Compilar a EXE
 
-`git clone https://github.com/sandrzejewskipl/spotify-scheduler.git`
+```powershell
+.\build_exe.ps1
+```
 
-Inside the Spotify Scheduler directory, run this command:
+El ejecutable se generará dentro de:
 
-`chmod +x run.sh`
+```text
+dist\SpotifySchedulerPro\SpotifySchedulerPro.exe
+```
 
-Now, you can run this app by running:
+## Datos locales
 
-`./run.sh`
+La aplicación usa la carpeta estándar de datos de usuario:
 
-This script will take care of making sure that Python3 and dependencies are installed.
+- Windows: `%LOCALAPPDATA%\SpotifySchedulerPro`
+- Linux: `~/.local/share/SpotifySchedulerPro`
+- macOS: `~/Library/Application Support/SpotifySchedulerPro`
 
-On the first run, you will be asked for CLIENT_ID and CLIENT_SECRET from Spotify. Then OAuth popup should open.
-## Running script manually
-<b>Clone the repository (by the command below, or download it)</b>
+Allí se almacenan:
 
-`git clone https://github.com/sandrzejewskipl/spotify-scheduler.git`
+- `scheduler.db`
+- `config.json`
+- `logs/app.log`
 
-<b>Install dependencies:</b><br>
-Make sure you have <b>Python 3</b> installed. Then, download the required packages by running:
+El `Client Secret` no se almacena dentro de `config.json`; se guarda mediante el
+almacén seguro de credenciales del sistema cuando `keyring` está disponible.
 
-`pip3 install -r requirements.txt`<br>
+## Nota importante
 
-Make sure you have <b>Python3-tk</b> installed.
+Esta edición se entrega como base completa de desarrollo. El código fue
+verificado mediante compilación estática y pruebas locales del motor de
+horarios, pero la autenticación y reproducción reales requieren tus
+credenciales, Spotify Premium, conexión a Internet y un dispositivo disponible.
 
-- Linux: `sudo apt-get install python3-tk`
 
-- MacOS: `brew install python-tk`
+## Automatización en GitHub
 
-<b>Set up Spotify App:</b>
+Los workflows incluidos ejecutan Ruff y pytest en GitHub Actions y permiten
+construir el ejecutable Windows manualmente desde la pestaña Actions, sin
+instalar dependencias en el equipo usado para administrar el repositorio.
 
-- Go to [Spotify for Developers Dashboard](https://developer.spotify.com/dashboard) and create a new app.<br>
-- Set the Redirect URI to: `http://127.0.0.1:23918`.<br>
-- Select Web API<br>
-
-Run this command from the command line in the same directory.
-
-`python3 spotifyscheduler.py`
-
-On the first run, you will be asked for CLIENT_ID and CLIENT_SECRET from Spotify. Then OAuth popup should open.
-
-If you're running script manually on Windows and you're using cmd.exe (not Windows Terminal) remember to disable Quickedit to prevent program from freezing:
-- Right-click the title bar of the Command Prompt window.
-- Select “Properties” from the context menu.
-- In the Properties window, click on the “Options” tab.
-- Under the "Edit Options" section, uncheck the box that says "QuickEdit Mode."
-Click "OK" to save your changes.
-
-## Settings
-![Screenshot of Settings tab](img/settings.png)
-
-### Supported languages:
-- English (en)
-- Polish (pl)
-### After changing the language, run the script again.
-
-<b>Device name</b> - name (or part of it) of the device in Spotify API that will play music. You can find the device name in the bottom-left corner or select it from the list. It defaults to host's name.
-
-<b>Play music only on weekdays</b> - Music will only be played from Monday to Friday. <b>Default: </b>Off
-
-<b>Kill the spotify process</b> - feature that kills the Spotify process(es) when an error with API occurs when pausing the playback. It prevents playing music out of schedule. <b>Default: </b>On
-
-<b>Auto-launch Spotify</b> - feature that automatically launches Spotify if the device is not detected on the devices list. <b>Default: </b>On
-
-<b>Skip explicit songs</b> - explicit content will be automatically skipped. <b>Default: </b>Off
-
-For optimal stability and reliable playback automation, it's recommended to enable both the Kill and Auto-launch Spotify features.
-### After changing CLIENT_ID or CLIENT_SECRET or wanting to change Spotify account (do it by logging in to another account in the browser), click `Delete cache (logout)` button.
-
-App data files (config, schedules, playlists, logs and spotify token) are stored inside user's data directory:
-
-Windows: `%localappdata%\spotify-scheduler`
-
-Linux: `~/.local/share/spotify-scheduler`
-
-MacOS: `~/Library/Application Support/spotify-scheduler`
-
-# If you find my app useful, I’d really appreciate your support via <a href="https://szymonandrzejewski.pl/donate/paypal">Paypal</a> ❤️
-
-<h1 align="center"><a href="https://github.com/sandrzejewskipl/spotify-scheduler/releases/latest">Download latest release</a> | <a href="https://github.com/sandrzejewskipl/spotify-scheduler/blob/main/CHANGELOG.md">Changelog</a></h1>
+Los tokens OAuth y el Client Secret se guardan con keyring. Al cerrar sesión se
+elimina también cualquier caché OAuth heredada.
