@@ -1,0 +1,23 @@
+name: Apply Spoxu design phase
+
+on:
+  push:
+    branches:
+      - agent/spotify-scheduler-pro
+    paths:
+      - .github/workflows/spoxu-phase.yml
+      - .github/spoxu/apply.py
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/spotify-scheduler-pro
+          fetch-depth: 0
+      - name: Apply audited Spoxu transformation
+        run: python .github/spoxu/apply.py
