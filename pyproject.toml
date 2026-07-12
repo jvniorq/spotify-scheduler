@@ -1,0 +1,54 @@
+
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spoxu"
+version = "0.2.0"
+description = "Spoxu automates Spotify playback with schedules, safe local storage, and a glass-inspired desktop interface."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "Szymon Andrzejewski"},
+  {name = "Spoxu contributors"}
+]
+dependencies = [
+  "spotipy>=2.26.0",
+  "psutil>=6.0.0",
+  "Pillow>=10.0.0",
+  "platformdirs>=4.0.0",
+  "keyring>=25.0.0",
+  "pystray>=0.19.5",
+  "requests>=2.31.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.8.0",
+  "pyinstaller>=6.0.0"
+]
+
+[project.scripts]
+spoxu = "spotify_scheduler_pro.__main__:main"
+spotify-scheduler-pro = "spotify_scheduler_pro.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
