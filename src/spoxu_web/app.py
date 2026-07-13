@@ -17,13 +17,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from .config import WebSettings
 from .runtime import WebRuntime
-from pwdlib import PasswordHash
-from spotify_scheduler_pro.models import ScheduleEntry, ScheduleKind
-from spotify_scheduler_pro.scheduler import SchedulerEngine
-from starlette.middleware.sessions import SessionMiddleware
-
-from .config import WebSettings
-from .runtime import WebRuntime
 
 STATIC_DIR = Path(__file__).with_name("static")
 PASSWORD_HASH = PasswordHash.recommended()
@@ -366,11 +359,11 @@ def create_app(settings: WebSettings) -> FastAPI:
     @app.get("/oauth/spotify/callback")
     def spotify_callback(
         request: Request,
+        runtime: Annotated[WebRuntime, Depends(get_runtime)],
         code: str | None = None,
         state_value: str | None = None,
         state: str | None = None,
         error: str | None = None,
-        runtime: Annotated[WebRuntime, Depends(get_runtime)] = None,
     ):
         require_auth(request)
         expected = request.session.pop("spotify_oauth_state", None)
