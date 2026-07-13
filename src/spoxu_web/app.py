@@ -15,6 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from spotify_scheduler_pro.models import ScheduleEntry, ScheduleKind
 from spotify_scheduler_pro.scheduler import SchedulerEngine
+
 from .config import WebSettings
 from .runtime import WebRuntime
 
