@@ -11,9 +11,10 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pwdlib import PasswordHash
+from starlette.middleware.sessions import SessionMiddleware
+
 from spotify_scheduler_pro.models import ScheduleEntry, ScheduleKind
 from spotify_scheduler_pro.scheduler import SchedulerEngine
-from starlette.middleware.sessions import SessionMiddleware
 
 from .config import WebSettings
 from .runtime import WebRuntime
