@@ -9,8 +9,8 @@ from typing import Annotated, Any
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pwdlib import PasswordHash
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from starlette.middleware.sessions import SessionMiddleware
 
 from spotify_scheduler_pro.models import ScheduleEntry, ScheduleKind
