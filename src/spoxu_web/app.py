@@ -15,7 +15,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from spotify_scheduler_pro.models import ScheduleEntry, ScheduleKind
 from spotify_scheduler_pro.scheduler import SchedulerEngine
-
 from .config import WebSettings
 from .runtime import WebRuntime
 
@@ -51,7 +50,7 @@ class SchedulePayload(BaseModel):
         return str(value or "").strip()
 
     @model_validator(mode="after")
-    def validate_schedule(self) -> "SchedulePayload":
+    def validate_schedule(self) -> SchedulePayload:
         if self.start_time == self.end_time:
             raise ValueError("La hora inicial y final no pueden ser iguales.")
         if self.kind == ScheduleKind.WEEKLY:

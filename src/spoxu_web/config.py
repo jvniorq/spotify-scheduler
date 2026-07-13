@@ -39,7 +39,7 @@ class WebSettings:
         return self.data_dir / "spotify.token"
 
     @classmethod
-    def from_env(cls) -> "WebSettings":
+    def from_env(cls) -> WebSettings:
         settings = cls(
             environment=os.getenv("SPOXU_ENVIRONMENT", "production").strip().lower(),
             base_url=os.getenv("SPOXU_BASE_URL", "").strip().rstrip("/"),
