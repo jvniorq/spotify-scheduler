@@ -1,12 +1,11 @@
-
 [build-system]
 requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "spoxu"
-version = "0.2.0"
-description = "Spoxu automates Spotify playback with schedules, safe local storage, and a glass-inspired desktop interface."
+version = "0.3.0"
+description = "Private single-user Spotify playback automation for web and desktop."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -25,10 +24,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+web = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "itsdangerous>=2.2,<3",
+  "pwdlib[argon2]>=0.2,<1",
+  "cryptography>=44,<47"
+]
 dev = [
-  "pytest>=8.0.0",
-  "ruff>=0.8.0",
-  "pyinstaller>=6.0.0"
+  "httpx>=0.27,<1",
+  "pytest>=8,<10",
+  "ruff>=0.8,<1",
+  "pyinstaller>=6,<7"
 ]
 
 [project.scripts]
@@ -40,6 +47,9 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+spoxu_web = ["static/*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

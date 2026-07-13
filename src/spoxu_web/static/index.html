@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <title>Spoxu · Automatización privada</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+  <div class="glow violet"></div>
+  <div class="glow cyan"></div>
+
+  <main id="loginView" class="login-shell">
+    <form id="loginForm" class="glass login-card">
+      <div class="logo">S</div>
+      <p class="eyebrow">Acceso único</p>
+      <h1>Spoxu</h1>
+      <p class="muted">Automatización musical personal y privada.</p>
+      <label for="password">Contraseña</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button class="button primary full" type="submit">Entrar</button>
+      <p id="loginError" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <div id="appView" class="shell" hidden>
+    <header class="glass topbar">
+      <a class="brand" href="/">
+        <span class="logo small">S</span>
+        <span><strong>Spoxu</strong><small>Panel privado</small></span>
+      </a>
+      <nav class="actions">
+        <span id="spotifyChip" class="chip neutral">Spotify desconectado</span>
+        <span id="automationChip" class="chip neutral">Motor</span>
+        <a class="button secondary" href="/oauth/spotify/start">Conectar Spotify</a>
+        <button id="automationButton" class="button secondary" type="button">Pausar</button>
+        <button id="logoutButton" class="button ghost" type="button">Salir</button>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Automatización real 24/7</p>
+          <h1>La música sigue tus horarios.</h1>
+          <p id="statusText" class="muted">Cargando estado…</p>
+        </div>
+        <button id="refreshButton" class="button secondary" type="button">Actualizar</button>
+      </section>
+
+      <section class="metrics">
+        <article class="glass card">
+          <span>Ahora</span>
+          <strong id="nowPlaying">Sin reproducción</strong>
+          <small id="nowPlayingMeta">—</small>
+        </article>
+        <article class="glass card">
+          <span>Próximo horario</span>
+          <strong id="nextSchedule">Sin datos</strong>
+          <small id="nextScheduleMeta">—</small>
+        </article>
+        <article class="glass card">
+          <span>Dispositivos</span>
+          <strong id="deviceMetric">0 disponibles</strong>
+          <small id="activeDevice">Ninguno activo</small>
+        </article>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">
+          <div><p class="eyebrow">Programación</p><h2>Horarios</h2></div>
+          <button id="newScheduleButton" class="button primary" type="button">Nuevo horario</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Estado</th><th>Nombre</th><th>Día/fecha</th><th>Horario</th><th>Playlist</th><th>Dispositivo</th><th>Prioridad</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="scheduleRows"></tbody>
+          </table>
+          <p id="emptySchedules" class="empty">Aún no hay horarios.</p>
+        </div>
+      </section>
+
+      <section class="columns">
+        <article class="glass panel">
+          <div class="section-title"><div><p class="eyebrow">Biblioteca</p><h2>Playlists</h2></div></div>
+          <div id="playlistList" class="list"></div>
+        </article>
+        <article class="glass panel">
+          <div class="section-title"><div><p class="eyebrow">Spotify Connect</p><h2>Dispositivos</h2></div></div>
+          <div id="deviceList" class="list"></div>
+        </article>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title"><div><p class="eyebrow">Registro</p><h2>Actividad reciente</h2></div></div>
+        <div id="historyList" class="list"></div>
+      </section>
+    </main>
+
+    <footer>Spoxu · Proyecto personal, privado y no comercial.</footer>
+  </div>
+
+  <dialog id="scheduleDialog">
+    <form id="scheduleForm" class="dialog-card">
+      <div class="section-title">
+        <div><p class="eyebrow">Horario</p><h2 id="dialogTitle">Nuevo horario</h2></div>
+        <button id="closeDialogButton" class="icon-button" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <input id="scheduleId" type="hidden">
+      <div class="form-grid">
+        <label class="wide">Nombre<input id="scheduleName" required maxlength="120"></label>
+        <label>Tipo
+          <select id="scheduleKind">
+            <option value="weekly">Semanal</option>
+            <option value="date">Fecha específica</option>
+          </select>
+        </label>
+        <label id="dayField">Día
+          <select id="scheduleDay">
+            <option value="0">Lunes</option><option value="1">Martes</option>
+            <option value="2">Miércoles</option><option value="3">Jueves</option>
+            <option value="4">Viernes</option><option value="5">Sábado</option>
+            <option value="6">Domingo</option>
+          </select>
+        </label>
+        <label id="dateField" hidden>Fecha<input id="scheduleDate" type="date"></label>
+        <label>Inicio<input id="scheduleStart" type="time" required></label>
+        <label>Final<input id="scheduleEnd" type="time" required></label>
+        <label class="wide">Playlist<select id="schedulePlaylist" required></select></label>
+        <label>Dispositivo<select id="scheduleDevice"><option value="">Predeterminado</option></select></label>
+        <label>Prioridad<input id="schedulePriority" type="number" min="-100" max="100" value="0"></label>
+      </div>
+      <div class="checks">
+        <label><input id="scheduleEnabled" type="checkbox" checked> Habilitado</label>
+        <label><input id="scheduleRandom" type="checkbox"> Random Queue</label>
+        <label><input id="scheduleExplicit" type="checkbox"> Omitir explícitas</label>
+      </div>
+      <p class="muted">Los horarios nocturnos como 22:00–02:00 están permitidos.</p>
+      <div class="dialog-actions">
+        <button id="cancelDialogButton" class="button secondary" type="button">Cancelar</button>
+        <button class="button primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden role="status"></div>
+</body>
+</html>
